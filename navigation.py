@@ -27,15 +27,19 @@ class Navigation:
 
         if not passengers:
             passenger = self.nearest_passenger()
-            print('nearest passenger: {}'.format(passenger))
             if passenger:
                 self.navigate_to_passenger(passenger)
+            else:
+                # could navigate back to middle of map here
+                print('no passengers available')
+                return
 
         if self.queued_path:
-            print('queued path:', self.queued_path)
             new_position = self.queued_path.pop()
-            print('new position: {}'.format(new_position))
             self.move_car(new_position)
+
+        print(self.queued_path)
+        print('car is at:', self.car_position)
 
         # is the current position a pickup or dropoff location
         # assumes that each rider has a distinct pickup and dropoff location
@@ -50,6 +54,8 @@ class Navigation:
             print('dropped off {}'.format(passenger_to_dropoff['name']))
             self.car.dropoff(passenger_to_dropoff)
 
+        print('\n')
+
     def move_car(self, position):
         self.car_position = position
 
@@ -59,7 +65,7 @@ class Navigation:
             pickup = self.queued_path[-1]
         else:
             pickup = self.car_position
-        print('setting route', pickup, destination)
+
         self.queue_path(pickup, destination)
 
 
