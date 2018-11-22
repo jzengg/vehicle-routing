@@ -94,7 +94,7 @@ class Navigation:
             path.append(current)
         return path
 
-n = Navigation(Grid(10, 10), (0,0))
+n = Navigation(Grid(10, 10), car_position=(0,0))
 requests = [
     {'name': 'Jimmy', 'start': (0,1), 'end': (0,4)},
     {'name': 'Allison', 'start': (4,4), 'end': (4,0)}
