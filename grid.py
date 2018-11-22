@@ -1,23 +1,20 @@
-from car import Car
 
 class Grid:
 
-    def __init__(self, x=10, y=10):
-        self.grid = [[None for i in range(x)] for j in range(y)]
-        # assume that car starts near center of grid, or randomly select a point?
-        midpoint = (x // 2, y // 2)
-        self.grid[midpoint[0]][midpoint[1]] = Car()
+    def __init__(self, width=10, height=10, car_position=None):
+        self.width = width
+        self.height = height
+        # assume that car starts near center of state, or randomly select a point?
+        if car_position is None:
+            car_position = (width // 2, height // 2)
+        self.car_position = car_position
 
-    def print_state(self):
-        output = ''
-        for row in self.grid:
-            output += (' ').join(str(point) if point else '|' for point in row)
-            output += '\n'
-        print(output)
+    def in_bounds(self, position):
+        (x, y) = position
+        return 0 <= x < self.width and 0 <= y < self.height
 
-
-
-
-g = Grid()
-c = Car()
-g.print_state()
+    def neighbors(self, position):
+        (x, y) = position
+        neighboring_nodes = [(x+1, y), (x, y-1), (x-1, y), (x, y+1)]
+        valid_neighbors = filter(self.in_bounds, neighboring_nodes)
+        return valid_neighbors
