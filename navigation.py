@@ -1,8 +1,5 @@
 import collections
 
-from grid import Grid
-from car import Car
-
 class Navigation:
 
     def __init__(self, grid, car, car_position=None):
@@ -40,7 +37,6 @@ class Navigation:
         if self.queued_path:
             new_position = self.queued_path.pop()
             self.move_car(new_position)
-
 
         # is the current position a pickup or dropoff location?
         # assumes that each rider has a distinct pickup and dropoff location
@@ -82,7 +78,7 @@ class Navigation:
 
     def bfs(self, start, break_func=None):
         # break_func should be a function that accepts one argument, the current node
-        # and returns a boolean for whether the bfs should stop
+        #   and returns a boolean for whether the bfs should stop
         frontier = collections.deque()
         frontier.append(start)
         came_from = {}
@@ -98,7 +94,7 @@ class Navigation:
                 if node not in came_from:
                     frontier.append(node)
                     came_from[node] = current
-
+        # returns a tuple that contains the node bfs finished at
         return came_from, current
 
     def find_path(self, start, end):
@@ -111,22 +107,3 @@ class Navigation:
                 break
             path.append(current)
         return path
-
-n = Navigation(Grid(10, 10), car=Car(), car_position=(0,0))
-requests = [
-    {'name': 'Jimmy', 'start': (0,1), 'end': (0,4)},
-    {'name': 'Allison', 'start': (0,2), 'end': (4,4)}
-]
-
-n.advance_time(requests)
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()
-n.advance_time()

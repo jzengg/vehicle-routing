@@ -1,4 +1,3 @@
-
 class Grid:
 
     def __init__(self, width=10, height=10):
