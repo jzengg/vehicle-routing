@@ -3,8 +3,13 @@ import collections
 
 class Navigation:
 
-    def __init__(self, grid):
+    def __init__(self, grid, car_position):
         self.grid = grid
+        # assume that car starts near center of state, or randomly select a point?
+        if car_position is None:
+            car_position = (grid.width // 2, grid.height // 2)
+        self.car_position = car_position
+
         self.passenger = None
         self.location_passenger_map = {}
         self.queued_path = collections.deque()
@@ -16,7 +21,7 @@ class Navigation:
             location = request['start']
             self.location_passenger_map[location] = request
 
-        # print('current position {}'.format(self.grid.car_position))
+        # print('current position {}'.format(self.car_position))
 
         if not self.passenger:
             self.pickup_passenger()
@@ -24,16 +29,19 @@ class Navigation:
         if self.queued_path:
             new_position = self.queued_path.pop()
             print('new position: {}'.format(new_position))
-            self.grid.move_car(new_position)
+            self.move_car(new_position)
 
         if self.passenger:
             passenger_pickup, passenger_dropoff = self.passenger['start'], self.passenger['end']
-            if self.grid.car_position == passenger_pickup:
+            if self.car_position == passenger_pickup:
                 print('picked up {}'.format(self.passenger['name']))
                 self.queue_path(passenger_dropoff)
-            elif self.grid.car_position == passenger_dropoff:
+            elif self.car_position == passenger_dropoff:
                 print('dropped off {}'.format(self.passenger['name']))
                 self.passenger = None
+
+    def move_car(self, position):
+        self.car_position = position
 
     def pickup_passenger(self):
         self.passenger = self.nearest_passenger()
@@ -43,12 +51,12 @@ class Navigation:
             self.queue_path(destination)
 
     def queue_path(self, destination):
-        path = self.find_path(self.grid.car_position, destination)
+        path = self.find_path(self.car_position, destination)
         self.queued_path = path
 
     def nearest_passenger(self):
         if self.location_passenger_map:
-            came_from, end = self.bfs(self.grid.car_position, lambda current: current in self.location_passenger_map)
+            came_from, end = self.bfs(self.car_position, lambda current: current in self.location_passenger_map)
             return self.location_passenger_map[end]
         else:
             return None
@@ -86,7 +94,7 @@ class Navigation:
             path.append(current)
         return path
 
-n = Navigation(Grid(car_position=(0,0)))
+n = Navigation(Grid(10, 10), (0,0))
 requests = [
     {'name': 'Jimmy', 'start': (0,1), 'end': (0,4)},
     {'name': 'Allison', 'start': (4,4), 'end': (4,0)}
