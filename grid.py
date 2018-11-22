@@ -9,6 +9,12 @@ class Grid:
             car_position = (width // 2, height // 2)
         self.car_position = car_position
 
+    def car_position(self):
+        return self.car_position
+
+    def move_car(self, position):
+        self.car_position = position
+
     def in_bounds(self, position):
         (x, y) = position
         return 0 <= x < self.width and 0 <= y < self.height
