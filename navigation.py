@@ -76,7 +76,7 @@ class Navigation:
             came_from, end = self.bfs(self.car_position, lambda current: current in self.location_passenger_map)
             return self.location_passenger_map[end]
 
-    def bfs(self, start, break_func=None):
+    def bfs(self, start, break_func):
         # break_func should be a function that accepts one argument, the current node
         #   and returns a boolean for whether the bfs should stop
         frontier = collections.deque()
