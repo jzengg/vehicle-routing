@@ -42,3 +42,6 @@ on how long a passenger should be in the car and how many passengers we'll allow
 We might be able to drop off passengers more efficiently like this since we'll have more options that might be conveniently along the way.
 
 We could also use Djikstra's algorithm with a higher edge weight for edges that touch a passenger or A* with a heuristic like additional passengers near pickup or dropoff.
+
+# Tests
+There is a very simple `test.py` that can be run to eyeball results.
