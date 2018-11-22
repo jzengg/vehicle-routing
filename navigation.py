@@ -5,14 +5,14 @@ from car import Car
 
 class Navigation:
 
-    def __init__(self, grid, car_position, car):
+    def __init__(self, grid, car, car_position=None):
         self.grid = grid
-        # assume that car starts near center of state, or randomly select a point?
+        self.car = car
+
         if car_position is None:
             car_position = (grid.width // 2, grid.height // 2)
-
         self.car_position = car_position
-        self.car = car
+
         self.location_passenger_map = {}
         self.queued_path = []
 
@@ -30,7 +30,7 @@ class Navigation:
             if passenger:
                 self.navigate_to_passenger(passenger)
             else:
-                # could navigate back to middle of map here
+                # could navigate back to middle of map or frequently used position to await new passengers
                 print('no passengers available')
                 return
 
@@ -38,23 +38,20 @@ class Navigation:
             new_position = self.queued_path.pop()
             self.move_car(new_position)
 
-        print(self.queued_path)
         print('car is at:', self.car_position)
 
-        # is the current position a pickup or dropoff location
+        # is the current position a pickup or dropoff location?
         # assumes that each rider has a distinct pickup and dropoff location
         passenger_to_pickup = self.location_passenger_map.get(self.car_position)
         passenger_to_dropoff = next((p for p in passengers if p['end'] == self.car_position), None)
         if passenger_to_pickup:
-            self.location_passenger_map.pop(passenger_to_pickup['start'], None)
             self.pickup_passenger(passenger_to_pickup)
+            self.location_passenger_map.pop(passenger_to_pickup['start'], None)
             self.queue_path(self.car_position, passenger_to_pickup['end'])
 
         if passenger_to_dropoff:
             print('dropped off {}'.format(passenger_to_dropoff['name']))
             self.car.dropoff(passenger_to_dropoff)
-
-        print('\n')
 
     def move_car(self, position):
         self.car_position = position
@@ -68,7 +65,6 @@ class Navigation:
 
         self.queue_path(pickup, destination)
 
-
     def pickup_passenger(self, passenger):
         print('picking up {}'.format(passenger['name']))
         self.car.pickup(passenger)
@@ -81,9 +77,6 @@ class Navigation:
         if self.location_passenger_map:
             came_from, end = self.bfs(self.car_position, lambda current: current in self.location_passenger_map)
             return self.location_passenger_map[end]
-        else:
-            return None
-
 
     def bfs(self, start, break_func=None):
         # break_func should be a function that accepts one argument, the current node
@@ -117,7 +110,7 @@ class Navigation:
             path.append(current)
         return path
 
-n = Navigation(Grid(10, 10), car_position=(0,0), car=Car())
+n = Navigation(Grid(10, 10), car=Car(), car_position=(0,0))
 requests = [
     {'name': 'Jimmy', 'start': (0,1), 'end': (0,4)},
     {'name': 'Allison', 'start': (0,2), 'end': (4,4)}
