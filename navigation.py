@@ -17,6 +17,9 @@ class Navigation:
         self.queued_path = []
 
     def advance_time(self, requests=None):
+        print('car is at:', self.car_position)
+        print('passengers in the car:', self.car.passengers)
+
         if requests is None:
             requests = []
         for request in requests:
@@ -38,7 +41,6 @@ class Navigation:
             new_position = self.queued_path.pop()
             self.move_car(new_position)
 
-        print('car is at:', self.car_position)
 
         # is the current position a pickup or dropoff location?
         # assumes that each rider has a distinct pickup and dropoff location
