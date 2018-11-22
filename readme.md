@@ -1,5 +1,12 @@
 # Vehicle Routing
 A simplistic representation of vehicle routing in a ride-hailing context.
+
+We have a grid that represents our city and using our `Navigation` class, we can hail a ride using `Navigation.advance_time` and passing a list of dicts with the format
+```
+{'name': 'Jimmy', 'start': (0,0), 'end': (4,4)}
+```
+`Navigation` will steer the car towards the nearest passenger and route to drop that passenger off, picking up any passengers that are directly enroute.
+
 Some assumptions I made:
   - each passenger has a unique pickup and dropoff location
   - we want to minimize the amount of time a person spends in the car, so we
