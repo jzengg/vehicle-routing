@@ -1,18 +1,20 @@
-from grid import Grid
 import collections
+
+from grid import Grid
+from car import Car
 
 class Navigation:
 
-    def __init__(self, grid, car_position):
+    def __init__(self, grid, car_position, car):
         self.grid = grid
         # assume that car starts near center of state, or randomly select a point?
         if car_position is None:
             car_position = (grid.width // 2, grid.height // 2)
-        self.car_position = car_position
 
-        self.passenger = None
+        self.car_position = car_position
+        self.car = car
         self.location_passenger_map = {}
-        self.queued_path = collections.deque()
+        self.queued_path = []
 
     def advance_time(self, requests=None):
         if requests is None:
@@ -21,38 +23,53 @@ class Navigation:
             location = request['start']
             self.location_passenger_map[location] = request
 
-        # print('current position {}'.format(self.car_position))
+        passengers = self.car.passengers
 
-        if not self.passenger:
-            self.pickup_passenger()
+        if not passengers:
+            passenger = self.nearest_passenger()
+            print('nearest passenger: {}'.format(passenger))
+            if passenger:
+                self.navigate_to_passenger(passenger)
 
         if self.queued_path:
+            print('queued path:', self.queued_path)
             new_position = self.queued_path.pop()
             print('new position: {}'.format(new_position))
             self.move_car(new_position)
 
-        if self.passenger:
-            passenger_pickup, passenger_dropoff = self.passenger['start'], self.passenger['end']
-            if self.car_position == passenger_pickup:
-                print('picked up {}'.format(self.passenger['name']))
-                self.queue_path(passenger_dropoff)
-            elif self.car_position == passenger_dropoff:
-                print('dropped off {}'.format(self.passenger['name']))
-                self.passenger = None
+        # is the current position a pickup or dropoff location
+        # assumes that each rider has a distinct pickup and dropoff location
+        passenger_to_pickup = self.location_passenger_map.get(self.car_position)
+        passenger_to_dropoff = next((p for p in passengers if p['end'] == self.car_position), None)
+        if passenger_to_pickup:
+            self.location_passenger_map.pop(passenger_to_pickup['start'], None)
+            self.pickup_passenger(passenger_to_pickup)
+            self.queue_path(self.car_position, passenger_to_pickup['end'])
+
+        if passenger_to_dropoff:
+            print('dropped off {}'.format(passenger_to_dropoff['name']))
+            self.car.dropoff(passenger_to_dropoff)
 
     def move_car(self, position):
         self.car_position = position
 
-    def pickup_passenger(self):
-        self.passenger = self.nearest_passenger()
-        if self.passenger:
-            self.location_passenger_map.pop(self.passenger['start'])
-            destination = self.passenger['start']
-            self.queue_path(destination)
+    def navigate_to_passenger(self, passenger):
+        destination = passenger['start']
+        if self.queued_path:
+            pickup = self.queued_path[-1]
+        else:
+            pickup = self.car_position
+        print('setting route', pickup, destination)
+        self.queue_path(pickup, destination)
 
-    def queue_path(self, destination):
-        path = self.find_path(self.car_position, destination)
-        self.queued_path = path
+
+    def pickup_passenger(self, passenger):
+        print('picking up {}'.format(passenger['name']))
+        self.car.pickup(passenger)
+
+    def queue_path(self, pickup, destination):
+        path = self.find_path(pickup, destination)
+        self.queued_path = path + self.queued_path
 
     def nearest_passenger(self):
         if self.location_passenger_map:
@@ -94,11 +111,12 @@ class Navigation:
             path.append(current)
         return path
 
-n = Navigation(Grid(10, 10), car_position=(0,0))
+n = Navigation(Grid(10, 10), car_position=(0,0), car=Car())
 requests = [
     {'name': 'Jimmy', 'start': (0,1), 'end': (0,4)},
-    {'name': 'Allison', 'start': (4,4), 'end': (4,0)}
+    {'name': 'Allison', 'start': (0,2), 'end': (4,4)}
 ]
+
 n.advance_time(requests)
 n.advance_time()
 n.advance_time()
